@@ -31,7 +31,14 @@ provider "aws" {
 }
 
 module "network" {
-    source          = "../../modules/network"
-    second_octet    = "${var.second_octet}"
-    env             = "${var.env}"
+    source              = "../../modules/network"
+    second_octet        = "${var.second_octet}"
+    env                 = "${var.env}"
+    openvpn_cidr_block  = "10.1.0.0/16"
+    openvpn_sg          = data.aws_security_group.openvpn_sg.id
+}
+
+data "aws_security_group" "openvpn_sg" {
+  provider = "aws.peer"
+  name = "openvpn_sg"
 }
