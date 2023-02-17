@@ -73,9 +73,9 @@ resource "aws_default_security_group" "main-default" {
 # Database (Postgres) Security Group
 # Attention to Postgres Port
 #===========================================================
-resource "aws_security_group" "postgres" {
-  name        = "postgres_sg"
-  description = "PostgreSQL Security Group"
+resource "aws_security_group" "databases" {
+  name        = "database_security_group"
+  description = "Security Group For Databases"
   vpc_id      = aws_vpc.main.id
 
   ingress {
@@ -83,43 +83,6 @@ resource "aws_security_group" "postgres" {
     to_port     = 5432
     protocol    = "tcp"
     security_groups = [aws_default_security_group.main-default.id]
-    description = "allow local traffic"
+    description = "allow local traffic for pg"
   }
-
-#     ingress {
-#     from_port   = 5432
-#     to_port     = 5432
-#     protocol    = "tcp"
-#     security_groups = [data.aws_security_group.openvpn.id]
-#     description = "allow openvpn traffic"
-#   }
-}
-
-#===========================================================
-# Database (Aurora Postgres) Security Group
-# Attention to Aurora PG Port
-# We could consolidate some of the database secrity groups, especially when multiple databases use the same ports (5432)
-# But we could have SQL Server, Redshift, etc.  Would we just add more ingress ports?
-# It's not that hard to just give each their own sg.
-#===========================================================
-resource "aws_security_group" "aurora_pg" {
-  name        = "aurora_pg_sg"
-  description = "Aurora PG Security Group"
-  vpc_id      = aws_vpc.main.id
-
-  ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    security_groups = [aws_default_security_group.main-default.id]
-    description = "allow local traffic"
-  }
-
-#     ingress {
-#     from_port   = 5432
-#     to_port     = 5432
-#     protocol    = "tcp"
-#     security_groups = [data.aws_security_group.openvpn.id]
-#     description = "allow openvpn traffic"
-#   }
 }

@@ -67,3 +67,19 @@ resource "aws_subnet" "Private-1C" {
         env = "${var.env}"
     }
 }
+
+#=================================================================
+# Subnet Group - Private - For Databases
+#=================================================================
+#private subnet group for databases
+resource "aws_db_subnet_group" "databases" {
+  name       = "database_subnet_group"
+  subnet_ids = [
+    aws_subnet.Private-1A.id,
+    aws_subnet.Private-1B.id,
+    aws_subnet.Private-1C.id
+    ]
+  tags = {
+    Name = "database_subnet_group"
+  }
+}
