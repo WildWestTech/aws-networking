@@ -65,6 +65,20 @@ resource "aws_security_group" "emr_engine_security_group" {
   }
 }
 
+resource "aws_security_group_rule" "emr_engine_security_group_egress" {
+  type                      = "egress"
+  from_port                 = 0
+  to_port                   = 0
+  protocol                  = -1
+  security_group_id         = aws_security_group.emr_engine_security_group.id
+  cidr_blocks               = ["0.0.0.0/0"]
+  description               = "allow all egress traffic"
+  depends_on = [
+    aws_security_group.emr_engine_security_group,
+    aws_security_group.emr_workspace_security_group
+  ]
+}
+
 resource "aws_security_group_rule" "emr_engine_security_group" {
   type                      = "ingress"
   from_port                 = 18888
@@ -84,11 +98,25 @@ resource "aws_security_group_rule" "emr_engine_security_group" {
 #===========================================================
 resource "aws_security_group" "emr_workspace_security_group" {
   name        = "emr_workspace_security_group"
-  description = "allow traffic to engine"
+  description = "allow all egress traffic"
   vpc_id      = aws_vpc.main.id
   tags        = {
     for-use-with-amazon-emr-managed-policies = true
   }
+}
+
+resource "aws_security_group_rule" "emr_workspace_security_group_egress" {
+  type                      = "egress"
+  from_port                 = 0
+  to_port                   = 0
+  protocol                  = -1
+  security_group_id         = aws_security_group.emr_workspace_security_group.id
+  cidr_blocks               = ["0.0.0.0/0"]
+  description               = "allow traffic from workspace"
+  depends_on = [
+    aws_security_group.emr_engine_security_group,
+    aws_security_group.emr_workspace_security_group
+  ]
 }
 
 resource "aws_security_group_rule" "emr_workspace_security_group_18888" {
