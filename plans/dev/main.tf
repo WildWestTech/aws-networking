@@ -39,6 +39,6 @@ module "network" {
 }
 
 data "aws_security_group" "openvpn_sg" {
-  provider = "aws.peer"
+  provider = aws.peer
   name = "openvpn_sg"
 }
