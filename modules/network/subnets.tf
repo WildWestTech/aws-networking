@@ -19,6 +19,7 @@ resource "aws_subnet" "Private-1A" {
     tags = {
         Name = "Private-1A"
         env = "${var.env}"
+        for-use-with-amazon-emr-managed-policies = true
     }
 }
 #=================================================================
@@ -42,6 +43,7 @@ resource "aws_subnet" "Private-1B" {
     tags = {
         Name = "Private-1B"
         env = "${var.env}"
+        for-use-with-amazon-emr-managed-policies = true
     }
 }
 #=================================================================
@@ -65,6 +67,7 @@ resource "aws_subnet" "Private-1C" {
     tags = {
         Name = "Private-1C"
         env = "${var.env}"
+        for-use-with-amazon-emr-managed-policies = true
     }
 }
 
