@@ -11,5 +11,6 @@ resource "aws_vpc" "main" {
     tags = {
         Name = "main"
         env  = "${var.env}"
+        for-use-with-amazon-emr-managed-policies = true
     }
 }

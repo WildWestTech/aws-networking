@@ -6,7 +6,7 @@
 resource "aws_default_security_group" "main-default" {
   vpc_id = aws_vpc.main.id
 
-    ingress {
+  ingress {
     protocol  = -1
     self      = true
     from_port = 0
@@ -14,7 +14,7 @@ resource "aws_default_security_group" "main-default" {
     description = "allow local traffic"
   }
 
-    ingress {
+  ingress {
     protocol  = -1
     from_port = 0
     to_port   = 0
@@ -51,4 +51,70 @@ resource "aws_security_group" "databases" {
     security_groups = [aws_default_security_group.main-default.id, var.openvpn_sg]
     description = "allow local traffic for pg"
   }
+}
+
+#===========================================================
+# EMR Studio: Engine - Allow Traffic From Workspace
+#===========================================================
+resource "aws_security_group" "emr_engine_security_group" {
+  name        = "emr_engine_security_group"
+  description = "allow traffic from workspace"
+  vpc_id      = aws_vpc.main.id
+  tags        = {
+    for-use-with-amazon-emr-managed-policies = true
+  }
+}
+
+resource "aws_security_group_rule" "emr_engine_security_group" {
+  type                      = "ingress"
+  from_port                 = 18888
+  to_port                   = 18888
+  protocol                  = "tcp"
+  security_group_id         = aws_security_group.emr_engine_security_group.id
+  source_security_group_id  = aws_security_group.emr_workspace_security_group.id
+  description               = "allow traffic from workspace"
+  depends_on = [
+    aws_security_group.emr_engine_security_group,
+    aws_security_group.emr_workspace_security_group
+  ]
+}
+
+#===========================================================
+# EMR Studio: Workspace - Allow Traffic To Engine and To Git
+#===========================================================
+resource "aws_security_group" "emr_workspace_security_group" {
+  name        = "emr_workspace_security_group"
+  description = "allow traffic to engine"
+  vpc_id      = aws_vpc.main.id
+  tags        = {
+    for-use-with-amazon-emr-managed-policies = true
+  }
+}
+
+resource "aws_security_group_rule" "emr_workspace_security_group_18888" {
+  type                      = "egress"
+  from_port                 = 18888
+  to_port                   = 18888
+  protocol                  = "tcp"
+  security_group_id         = aws_security_group.emr_workspace_security_group.id
+  source_security_group_id  = aws_security_group.emr_engine_security_group.id
+  description               = "allow traffic to engine"
+  depends_on = [
+    aws_security_group.emr_engine_security_group,
+    aws_security_group.emr_workspace_security_group
+  ]
+}
+
+resource "aws_security_group_rule" "emr_workspace_security_group_443" {
+  type                      = "egress"
+  from_port                 = 443
+  to_port                   = 443
+  protocol                  = "tcp"
+  cidr_blocks               = ["0.0.0.0/0"]
+  security_group_id         = aws_security_group.emr_workspace_security_group.id
+  description               = "allow traffic to git"
+  depends_on = [
+    aws_security_group.emr_engine_security_group,
+    aws_security_group.emr_workspace_security_group
+  ]
 }
