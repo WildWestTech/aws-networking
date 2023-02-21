@@ -4,7 +4,7 @@
 # Remaining public subnets will continue to implicitly associate with the main route table
 
 #===========================================================
-# Private Route Tables
+# Route Tables
 #===========================================================
 # Private Route Table
 # Default local route 10.x.0.0/16
