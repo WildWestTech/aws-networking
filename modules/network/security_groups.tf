@@ -140,7 +140,7 @@ resource "aws_security_group_rule" "emr_workspace_security_group_443" {
   protocol                  = "tcp"
   cidr_blocks               = ["0.0.0.0/0"]
   security_group_id         = aws_security_group.emr_workspace_security_group.id
-  description               = "allow traffic to git"
+  description               = "allow traffic to git" 
   depends_on = [
     aws_security_group.emr_engine_security_group,
     aws_security_group.emr_workspace_security_group
