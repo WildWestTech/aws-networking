@@ -86,3 +86,35 @@ resource "aws_db_subnet_group" "databases" {
     Name = "database_subnet_group"
   }
 }
+
+#=================================================================
+# Subnet Group - Private 
+#=================================================================
+#private subnet group
+resource "aws_db_subnet_group" "private" {
+  name       = "private_subnet_group"
+  subnet_ids = [
+    aws_subnet.Private-1A.id,
+    aws_subnet.Private-1B.id,
+    aws_subnet.Private-1C.id
+    ]
+  tags = {
+    Name = "private_subnet_group"
+  }
+}
+
+#=================================================================
+# Subnet Group - Public 
+#=================================================================
+#private subnet group for databases
+resource "aws_db_subnet_group" "public" {
+  name       = "public_subnet_group"
+  subnet_ids = [
+    aws_subnet.Public-1A.id,
+    aws_subnet.Public-1B.id,
+    aws_subnet.Public-1C.id
+    ]
+  tags = {
+    Name = "public_subnet_group"
+  }
+}

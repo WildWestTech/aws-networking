@@ -6,15 +6,6 @@
 #===========================================================
 # Route Tables
 #===========================================================
-# Private Route Table
-# Default local route 10.x.0.0/16
-resource "aws_route_table" "Private-RT" {
-    vpc_id = aws_vpc.main.id
-    tags = {
-        Name = "Private-RT"
-    }
-}
-
 # Public Route Table
 # Default local route 10.x.0.0/16
 resource "aws_route_table" "Public-RT" {
@@ -23,26 +14,49 @@ resource "aws_route_table" "Public-RT" {
         Name = "Public-RT"
     }
 }
+
+# Private Route Tables
+resource "aws_route_table" "Private-RT-1A" {
+    vpc_id = aws_vpc.main.id
+    tags = {
+        Name = "Private-RT-1A"
+    }
+}
+
+resource "aws_route_table" "Private-RT-1B" {
+    vpc_id = aws_vpc.main.id
+    tags = {
+        Name = "Private-RT-1B"
+    }
+}
+
+resource "aws_route_table" "Private-RT-1C" {
+    vpc_id = aws_vpc.main.id
+    tags = {
+        Name = "Private-RT-1C"
+    }
+}
 #===========================================================
-# Private Route Table Association
+# Private Route Table Association - By Subnet/AZ
 #===========================================================
 # Explicitly associate the private route table with subnet Private-1A
-resource "aws_route_table_association" "Private-1A" {
+resource "aws_route_table_association" "Private-RT-1A" {
     subnet_id = aws_subnet.Private-1A.id
-    route_table_id = aws_route_table.Private-RT.id
+    route_table_id = aws_route_table.Private-RT-1A.id
 }
 
 # Explicitly associate the private route table with subnet Private-1B
-resource "aws_route_table_association" "Private-1B" {
+resource "aws_route_table_association" "Private-RT-1B" {
     subnet_id = aws_subnet.Private-1B.id
-    route_table_id = aws_route_table.Private-RT.id
+    route_table_id = aws_route_table.Private-RT-1B.id
 }
 
-# Explicitly associate the private route table with subnet Private-1C
-resource "aws_route_table_association" "Private-1C" {
+# Explicitly associate the private route table with subnet Private-1A
+resource "aws_route_table_association" "Private-RT-1C" {
     subnet_id = aws_subnet.Private-1C.id
-    route_table_id = aws_route_table.Private-RT.id
+    route_table_id = aws_route_table.Private-RT-1C.id
 }
+
 #===========================================================
 # Public Route Table Association
 #===========================================================

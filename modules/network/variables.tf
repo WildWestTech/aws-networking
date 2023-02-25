@@ -13,3 +13,16 @@ variable openvpn_cidr_block {
 variable openvpn_sg {
     type = string
 }
+
+variable region {
+    type = string
+    default = "us-east-1"
+}
+
+variable "nat-gateway-az-list" {
+   type= list
+   default= [
+    "1A",
+    "1B"
+    ]
+}

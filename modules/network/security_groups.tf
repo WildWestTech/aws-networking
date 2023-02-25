@@ -43,16 +43,33 @@ resource "aws_security_group" "databases" {
   name        = "database_security_group"
   description = "Security Group For Databases"
   vpc_id      = aws_vpc.main.id
-
-  ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    security_groups = [aws_default_security_group.main-default.id, var.openvpn_sg]
-    description = "allow local traffic for pg"
-  }
 }
 
+resource "aws_security_group_rule" "databases-pg-main" {
+  type                      = "ingress"
+  from_port                 = 5432
+  to_port                   = 5432
+  protocol                  = "tcp"
+  security_group_id         = aws_security_group.databases.id
+  source_security_group_id  = aws_default_security_group.main-default.id
+  description               = "allow local traffic for pg"
+  depends_on = [
+    aws_security_group.databases
+  ]
+}
+
+resource "aws_security_group_rule" "databases-pg-openvpn" {
+  type                      = "ingress"
+  from_port                 = 5432
+  to_port                   = 5432
+  protocol                  = "tcp"
+  security_group_id         = aws_security_group.databases.id
+  source_security_group_id  = var.openvpn_sg
+  description               = "allow local traffic for pg"
+  depends_on = [
+    aws_security_group.databases
+  ]
+}
 #===========================================================
 # EMR Studio: Engine - Allow Traffic From Workspace
 #===========================================================
@@ -145,4 +162,94 @@ resource "aws_security_group_rule" "emr_workspace_security_group_443" {
     aws_security_group.emr_engine_security_group,
     aws_security_group.emr_workspace_security_group
   ]
+}
+
+
+#===========================================================
+# MWAA
+# https://docs.aws.amazon.com/mwaa/latest/userguide/networking-about.html
+#===========================================================
+resource "aws_security_group" "mwaa" {
+  name = "mwaa_security_group"
+  vpc_id      = aws_vpc.main.id
+  tags = {
+    Name = "mwaa-sg"
+  }
+}
+
+resource "aws_security_group_rule" "mwaa_self_referencing" {
+  type                      = "ingress"
+  from_port                 = 0
+  to_port                   = 0
+  protocol                  = -1
+  self                      = true
+  description               = "self referencing"
+  security_group_id         = aws_security_group.mwaa.id 
+  depends_on                = [aws_security_group.mwaa]
+}
+
+resource "aws_security_group_rule" "mwaa_outbound" {
+  type                      = "egress"
+  from_port                 = 0
+  to_port                   = 0
+  protocol                  = -1
+  cidr_blocks               = ["0.0.0.0/0"]
+  description               = "allow outbound"
+  security_group_id         = aws_security_group.mwaa.id
+  depends_on                = [aws_security_group.mwaa]
+}
+
+resource "aws_security_group_rule" "mwaa_tcp" {
+  type                      = "ingress"
+  from_port                 = 443
+  to_port                   = 443
+  protocol                  = "tcp"
+  self                      = true
+  description               = "allow tcp"
+  security_group_id         = aws_security_group.mwaa.id
+  depends_on                = [aws_security_group.mwaa]
+}
+
+resource "aws_security_group_rule" "mwaa_pg" {
+  type                      = "ingress"
+  from_port                 = 5432
+  to_port                   = 5432
+  protocol                  = "tcp"
+  self                      = true
+  description               = "mwaa postgres metadata"
+  security_group_id         = aws_security_group.mwaa.id
+  depends_on                = [aws_security_group.mwaa]
+}
+
+#===========================================================
+# AirFlow EC2
+#===========================================================
+resource "aws_security_group" "airflow_ec2_security_group" {
+  name = "airflow_ec2_security_group"
+  vpc_id      = aws_vpc.main.id
+  tags = {
+    Name = "airflow_ec2_security_group"
+  }
+}
+
+resource "aws_security_group_rule" "airflow_ec2_security_group_outbound" {
+  type                      = "egress"
+  from_port                 = 0
+  to_port                   = 0
+  protocol                  = -1
+  cidr_blocks               = ["0.0.0.0/0"]
+  description               = "allow outbound"
+  security_group_id         = aws_security_group.airflow_ec2_security_group.id
+  depends_on                = [aws_security_group.airflow_ec2_security_group]
+}
+
+resource "aws_security_group_rule" "airflow-openvpn" {
+  type                      = "ingress"
+  from_port                 = 0
+  to_port                   = 0
+  protocol                  = -1
+  security_group_id         = aws_security_group.airflow_ec2_security_group.id
+  source_security_group_id  = var.openvpn_sg
+  description               = "allow vpn traffic"
+  depends_on                = [aws_security_group.airflow_ec2_security_group]
 }
