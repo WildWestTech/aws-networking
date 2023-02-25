@@ -62,10 +62,26 @@ data "aws_route_table" "Public-RT" {
   vpc_id = data.aws_vpc.main.id
 }
 
-data "aws_route_table" "Private-RT" {
+data "aws_route_table" "Private-RT-1A" {
   filter {
     name   = "tag:Name"
-    values = ["Private-RT"]
+    values = ["Private-RT-1A"]
+  }
+  vpc_id = data.aws_vpc.main.id
+}
+
+data "aws_route_table" "Private-RT-1B" {
+  filter {
+    name   = "tag:Name"
+    values = ["Private-RT-1B"]
+  }
+  vpc_id = data.aws_vpc.main.id
+}
+
+data "aws_route_table" "Private-RT-1C" {
+  filter {
+    name   = "tag:Name"
+    values = ["Private-RT-1C"]
   }
   vpc_id = data.aws_vpc.main.id
 }
@@ -76,8 +92,20 @@ resource "aws_route" "peer_route_to_openvpn-Public-RT" {
   vpc_peering_connection_id = aws_vpc_peering_connection.peer.id
 }
 
-resource "aws_route" "peer_route_to_openvpn-Private-RT" {
-  route_table_id = data.aws_route_table.Private-RT.id
+resource "aws_route" "peer_route_to_openvpn-Private-RT-1A" {
+  route_table_id = data.aws_route_table.Private-RT-1A.id
+  destination_cidr_block = data.aws_vpc.peer.cidr_block
+  vpc_peering_connection_id = aws_vpc_peering_connection.peer.id
+}
+
+resource "aws_route" "peer_route_to_openvpn-Private-RT-1B" {
+  route_table_id = data.aws_route_table.Private-RT-1B.id
+  destination_cidr_block = data.aws_vpc.peer.cidr_block
+  vpc_peering_connection_id = aws_vpc_peering_connection.peer.id
+}
+
+resource "aws_route" "peer_route_to_openvpn-Private-RT-1C" {
+  route_table_id = data.aws_route_table.Private-RT-1C.id
   destination_cidr_block = data.aws_vpc.peer.cidr_block
   vpc_peering_connection_id = aws_vpc_peering_connection.peer.id
 }
