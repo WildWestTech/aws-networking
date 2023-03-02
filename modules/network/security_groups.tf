@@ -253,3 +253,47 @@ resource "aws_security_group_rule" "airflow-openvpn" {
   description               = "allow vpn traffic"
   depends_on                = [aws_security_group.airflow_ec2_security_group]
 }
+
+#===========================================================
+# Windows Server EC2
+#===========================================================
+resource "aws_security_group" "windows_server_ec2_security_group" {
+  name = "windows_server_ec2_security_group"
+  vpc_id      = aws_vpc.main.id
+  tags = {
+    Name = "windows_server_ec2_security_group"
+  }
+}
+
+resource "aws_security_group_rule" "windows_server_ec2_security_group_outbound" {
+  type                      = "egress"
+  from_port                 = 0
+  to_port                   = 0
+  protocol                  = -1
+  cidr_blocks               = ["0.0.0.0/0"]
+  description               = "allow outbound"
+  security_group_id         = aws_security_group.windows_server_ec2_security_group.id
+  depends_on                = [aws_security_group.windows_server_ec2_security_group]
+}
+
+resource "aws_security_group_rule" "windows-server-openvpn" {
+  type                      = "ingress"
+  from_port                 = 0
+  to_port                   = 0
+  protocol                  = -1
+  security_group_id         = aws_security_group.windows_server_ec2_security_group.id
+  source_security_group_id  = var.openvpn_sg
+  description               = "allow vpn traffic"
+  depends_on                = [aws_security_group.windows_server_ec2_security_group]
+}
+
+resource "aws_security_group_rule" "windows-server-local" {
+  type                      = "ingress"
+  from_port                 = 0
+  to_port                   = 0
+  protocol                  = -1
+  security_group_id         = aws_security_group.windows_server_ec2_security_group.id
+  cidr_blocks               = [aws_vpc.main.cidr_block]
+  description               = "allow local traffic"
+  depends_on                = [aws_security_group.windows_server_ec2_security_group]
+}
